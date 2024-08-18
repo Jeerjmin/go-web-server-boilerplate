@@ -12,5 +12,5 @@ func main() {
 	db := database.NewDatabase(c)
 	db.Connect()
 
-	server.NewServer(c).Start()
+	server.NewServer(c, db).Start()
 }
