@@ -45,7 +45,7 @@ func GetUser(db *gorm.DB) gin.HandlerFunc {
 func GetUsers(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var users []models.User
-		if err := db.Find(&users).Error; err != nil {
+		if err := db.Limit(20).Find(&users).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

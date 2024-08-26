@@ -1,6 +1,7 @@
 package api
 
 import (
+	"go-auth/api/auth"
 	"go-auth/api/user"
 	database "go-auth/internal/db"
 
@@ -17,6 +18,7 @@ func RegisterRoutes(db *database.Database) *gin.Engine {
 	})
 
 	user.RegisterRoutes(router, db)
+	auth.RegisterRoutes(router, db)
 
 	return router
 }

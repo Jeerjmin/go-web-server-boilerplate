@@ -14,6 +14,13 @@ type Config struct {
 	PostgresqlUser     string
 	PostgresqlPassword string
 	PostgresqlDatabase string
+	SecretJWTKey       string
+}
+
+var C *Config
+
+func init() {
+	C = NewConfig()
 }
 
 func NewConfig() *Config {
@@ -49,6 +56,11 @@ func NewConfig() *Config {
 		log.Fatal("POSTGRESQL_DATABASE is not set in .env file")
 	}
 
+	secretJWTKey := os.Getenv("SECRET_JWT_KEY")
+	if secretJWTKey == "" {
+		log.Fatal("SECRET_JWT_KEY is not set in .env file")
+	}
+
 	return &Config{
 		Port:               port,
 		PostgresqlHost:     postgresqlHost,
@@ -56,5 +68,6 @@ func NewConfig() *Config {
 		PostgresqlUser:     postgresqlUser,
 		PostgresqlPassword: postgresqlPassword,
 		PostgresqlDatabase: postgresqlDatabase,
+		SecretJWTKey:       secretJWTKey,
 	}
 }
