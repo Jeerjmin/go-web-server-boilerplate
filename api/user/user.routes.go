@@ -10,7 +10,7 @@ import (
 func RegisterRoutes(router *gin.Engine, db *database.Database) *gin.Engine {
 	v := validator.NewValidator()
 
-	router.POST("/users", validator.ValidateRequest[CreateUserRequest](v), CreateUser(db.DB))
+	router.POST("/users", CreateUser(db.DB))
 	router.GET("/users/:id", v.ValidateIDParam(), GetUser(db.DB))
 	router.GET("/users", GetUsers(db.DB))
 	router.PUT("/users/:id", v.ValidateIDParam(), validator.ValidateRequest[UpdateUserRequest](v), UpdateUser(db.DB))

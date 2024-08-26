@@ -10,20 +10,40 @@ import (
 
 func CreateUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		req := c.MustGet("validatedRequest").(CreateUserRequest)
-
-		user := models.User{
-			Email:    req.Email,
-			Password: req.Password,
-			Name:     req.Name,
-			Role:     req.Role,
+		var req struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+			Name     string `json:"name"`
+			Role     string `json:"role"`
+		}
+		// Попробуйте распарсить JSON из тела запроса в req
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+			return
 		}
 
-		if err := db.Create(&user).Error; err != nil {
+		// Чистый SQL запрос для вставки данных
+		query := `
+			INSERT INTO "users" ("name", "email", "role", "password")
+			VALUES (?, ?, ?, ?)
+			RETURNING "id", "name", "email", "role";
+		`
+
+		// Переменная для хранения данных нового пользователя
+		var user struct {
+			ID    int    `json:"id"`
+			Name  string `json:"name"`
+			Email string `json:"email"`
+			Role  string `json:"role"`
+		}
+
+		// Выполнение SQL-запроса через GORM
+		if err := db.Raw(query, req.Name, req.Email, req.Role, req.Password).Scan(&user).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
+		// Возвращаем данные нового пользователя в JSON формате
 		c.JSON(http.StatusCreated, gin.H{"user": user})
 	}
 }
@@ -44,12 +64,23 @@ func GetUser(db *gorm.DB) gin.HandlerFunc {
 
 func GetUsers(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Чистый SQL-запрос для выборки пользователей
+		query := `
+			SELECT "id", "name", "email", "role", "password"
+			FROM "users"
+			LIMIT 20;
+		`
+
+		// Переменная для хранения данных пользователей
 		var users []models.User
-		if err := db.Find(&users).Error; err != nil {
+
+		// Выполнение SQL-запроса через GORM
+		if err := db.Raw(query).Scan(&users).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
+		// Возвращаем данные пользователей в JSON формате
 		c.JSON(http.StatusOK, gin.H{"users": users})
 	}
 }

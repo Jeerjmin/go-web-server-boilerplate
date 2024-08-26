@@ -1,0 +1,14 @@
+config:
+  target: 'http://localhost:8080/users'
+  phases:
+    - duration: 60         
+      arrivalRate: 10         
+scenarios:
+  - flow:
+      - get:
+          url: "/users"
+          capture:
+            - json: "$.statusCode"
+              as: "status_code"
+          validate:
+            - statusCode: 200
